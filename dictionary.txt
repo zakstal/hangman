@@ -27325,7 +27325,7 @@ TREBLY {triply=adv} [adv]
 TREENS <treen=n> [n]
 TREFAH {tref=adj} [adj]
 TREMOR a shaking movement [n -S]
-TRENCH to dig a long, narrow excavation in the ground [v -ED, -ING, -ES]
+dr
 TRENDS <trend=v> [v]
 TRENDY very fashionable [adj TRENDIER, TRENDIEST] : TRENDILY [adv] / a trendy person [n TRENDIES]
 TREPAN to {trephine=v} [v -PANNED, -PANNING, -PANS]

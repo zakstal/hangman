@@ -1,4 +1,4 @@
-require 'pp'
+# require 'pp'
 
 module GameVoice
 	def voice
@@ -16,8 +16,8 @@ module GameVoice
 			:intro			=> (
 								"\n\n  How long do you want your word to be? or type any key for a random length\n\n\n\tTo turn on or off evil mode (your word will be replaced by a word\n\twith the same guessed letter) type: EVIL\n\tEvil is #{(self.word.evil == 0 ? "off" : "on")}"
 								),
-			:defin 			=> "\n\nDefinition: #{self.word.dictionary.defin}",
-			:root 			=> "Root: #{self.word.dictionary.root}",
+			:defin 			=> "\n\n#{self.word.dictionary.defin.match(/([^\[])+/)[0]}",
+			:root 			=> "#{self.word.dictionary.root.match(/([^\[])+/)[0]}",
 			:new_game		=> "\nNew Game?"
 			
 		}
@@ -36,13 +36,14 @@ module HangMan
 		include GameVoice
 		#########################################################################################################
 			class Man
-				attr_accessor :board, :number_of_limbs, :draw_this
+				attr_accessor :board, :number_of_limbs, :draw_this, :extras
 
 				def initialize(number_of_limbs)
 					@board = []
 					@number_of_limbs = number_of_limbs
-					@draw_this = all_limbs_in_order[0..@number_of_limbs]
+					@draw_this = all_limbs_in_order[0..@number_of_limbs]					
 					make_board
+					draw_extras(0) if 2 == rand(3)
 					# p @board
 				end
 
@@ -59,7 +60,7 @@ module HangMan
 
 				def hanger
 					all = []
-					char = "#"
+					char = ["=","#","*","H","||","~","X"][rand(6)]
 					i = 0
 					while i < 20
 						all << [2 + i, 18, char] if i < 2
@@ -177,6 +178,56 @@ module HangMan
 					
 				end
 
+				def bird
+					i = rand(10)
+					j = rand(30)
+					c = [".","'","\""]
+					char = c[rand(c.length)]
+					[
+						[i,j,char],
+						[i -1,j+1,char],
+						[i -1,j+2,char],
+						[i, j+3, char],
+						[i-1, j+4,char],
+						[i-1,j+5,char],
+						[i,j+6,char]
+
+					]
+					
+				end
+				def horizon
+					arr = []
+					j = 2
+					80.times{
+						arr << [13,j,"~"]
+						j += 1
+					}
+					arr
+				end
+				def sunset
+					i = 13
+					j = 40
+					[
+						[i,j,":"],
+						# [i-1,j, "'"],
+						[i -1,j+1,","],
+						[i -2,j+7,"."],
+						[i -2,j+3,"."],
+						[i -2,j+4,"."],
+						[i-1,j+9,"."],
+						[i -2,j+6,"."],
+						[i ,j+10,":"],
+						# [i + 1, j+2,"-"],
+						# [i + 2, j+4,"-"],
+						# [i + 3, j+6,"-"],
+						# [i + 2, j+7,"-"],
+						# [i + 1, j+9,"-"],
+						# [i + 1, j+5,"-"],
+
+					]
+					
+				end
+
 				private
 
 				def all_limbs_in_order
@@ -196,11 +247,29 @@ module HangMan
 					]
 					#maybe use self.methods but only get private methids
 				end
+				
+				def other_stuff
+					arr = []
+					rand(4).times{ arr << bird}
+					r = rand(3)
+					p r
+					if 2 == r
+						arr << horizon
+						arr << sunset 
+					end
+					arr
+				end
 
 				def make_board
 					line = ""
-					40.times{ line << " "}
+					70.times{ line << " "}
 					17.times{ @board << [line.dup]}
+				end
+
+				def draw_extras(guesses_so_Far)
+					other_stuff.flatten(1).each do |line|
+						draw_a_line(line[0], line[1], line[2])
+					end
 				end
 
 				def draw(guesses_so_Far)
@@ -232,7 +301,7 @@ module HangMan
 					dictionary.each do |line|
 						next if line == " " 
 						word 	= line.match(/^\w+/)[0].swapcase
-						defin 	= line.gsub(/#{word}/,"")
+						defin 	= line#[word.length + 1..-1]
 						root 	= (if line =~ /<\w+/
 										line.match(/<\w+/)[0][1..-1]
 									elsif  line =~ /\{\w+/
@@ -258,8 +327,8 @@ module HangMan
 					word = all[rand(all.length)]	
 					@word = word[0]
 					word[1].each do |key, value|
-						@defin = key
-						@root = value == " " ? " " : @dictionary[value].keys[0]
+						@defin = "Definition: #{key}"
+						@root = value == " " ? " " : "      Root: #{@dictionary[value].keys[0]}"
 					end
 				end
 				def assign_this_word(word)
@@ -349,7 +418,6 @@ module HangMan
 		def evil_maker
 			if @evil == 1 && @w_l == nil
 				wor = @word.dup.gsub(/[#{@word_left}]/," ")
-				# pp @dictionary.of_length.keys
 				dictionary.of_length.each { |line_word|
 					next if line_word == @word 
 						match = []							#this is an array of ones and zeros to be multiplied. if any zeros than it will all be zero and it will not be a match
@@ -449,11 +517,6 @@ module HangMan
 				@hang_man = Man.new(choice)
 				
 		end
-		def how_many(num,word)
-			
-		end
-
-
 	end
 
 	
@@ -467,11 +530,11 @@ loop do
 	loop do
 		w.show_board
 		# p w.word.word
+		letter = gets.chomp.downcase
+		exit if letter == "exit"
+		break if letter == "new"
 		break if w.word.w_l != nil
-		let = gets.chomp
-		exit if let == "exit"
-		break if let == "new"
-		w.guess(let)
+		w.guess(letter)
 		w.word.evil_maker
 	end
 
