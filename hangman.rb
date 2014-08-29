@@ -18,7 +18,8 @@ module GameVoice
 								),
 			:defin 			=> "\n\n#{self.word.dictionary.defin.match(/([^\[])+/)[0]}",
 			:root 			=> "#{self.word.dictionary.root.match(/([^\[])+/)[0]}",
-			:new_game		=> "\nNew Game?"
+			:new_game		=> "\nNew Game?",
+			:hangman 		=> "\t       H     H____.\n\t       H     H    |\n\t       H     H    =\n\t     _ HHHHHHH    U\n\t    _  H     H    \n\t*  _   H     H                     \n\tT _    H     H ang Man            \n\t"
 			
 		}
 	end
@@ -43,7 +44,7 @@ module HangMan
 					@number_of_limbs = number_of_limbs
 					@draw_this = all_limbs_in_order[0..@number_of_limbs]					
 					make_board
-					draw_extras(0) if 2 == rand(3)
+					draw_extras(0) if 1 == rand(2)
 					# p @board
 				end
 
@@ -60,7 +61,7 @@ module HangMan
 
 				def hanger
 					all = []
-					char = ["=","#","*","H","||","~","X"][rand(6)]
+					char = ["=","#","*","H",">","~","X"][rand(6)]
 					i = 0
 					while i < 20
 						all << [2 + i, 18, char] if i < 2
@@ -180,7 +181,7 @@ module HangMan
 
 				def bird
 					i = rand(10)
-					j = rand(30)
+					j = rand(60)
 					c = [".","'","\""]
 					char = c[rand(c.length)]
 					[
@@ -206,7 +207,7 @@ module HangMan
 				end
 				def sunset
 					i = 13
-					j = 40
+					j = 35 + rand(10)
 					[
 						[i,j,":"],
 						# [i-1,j, "'"],
@@ -251,9 +252,8 @@ module HangMan
 				def other_stuff
 					arr = []
 					rand(4).times{ arr << bird}
-					r = rand(3)
-					p r
-					if 2 == r
+					r = rand(2)
+					if 1 == r
 						arr << horizon
 						arr << sunset 
 					end
@@ -464,8 +464,9 @@ module HangMan
 		end
 
 		def show_intro
-			15.times{puts "\n"}
-			put :intro
+			5.times{puts "\n"}
+			put :hangman,
+				:intro
 			5.times{puts "\n"}
 		end
 
