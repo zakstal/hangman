@@ -62,6 +62,7 @@ module HangMan
 					@board
 				end
 
+				private
 				def hanger
 					all = []
 					name = @your_name.split("")
@@ -271,7 +272,7 @@ module HangMan
 					]
 				end
 
-				private
+				
 
 				def all_limbs_in_order
 					[
