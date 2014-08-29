@@ -19,8 +19,8 @@ module GameVoice
 			:defin 			=> "\n\n#{self.word.dictionary.defin.match(/([^\[])+/)[0]}",
 			:root 			=> "#{self.word.dictionary.root.match(/([^\[])+/)[0]}",
 			:new_game		=> "\nNew Game?",
-			:hangman 		=> "\t       H     H____.\n\t       H     H    |\n\t       H     H    =\n\t     _ HHHHHHH    U\n\t    _  H     H    \n\t*  _   H     H                     \n\tT _    H     H ang Man            \n\t"
-			
+			:hangman 		=> "\t       H     H____.\n\t       H     H    |\n\t       H     H    =\n\t     _ HHHHHHH    U\n\t    _  H     H    \n\t*  _   H     H                     \n\tT _    H     H ang Man            \n\t",
+			:what_name		=> "\n\n\tWho is going to save this man!?\n\n"
 		}
 	end
 
@@ -37,14 +37,17 @@ module HangMan
 		include GameVoice
 		#########################################################################################################
 			class Man
-				attr_accessor :board, :number_of_limbs, :draw_this, :extras
+				attr_accessor :board, :number_of_limbs, :draw_this, :your_name
 
-				def initialize(number_of_limbs)
+
+				def initialize(number_of_limbs,your_name = "zak")
+					@your_name = your_name
 					@board = []
 					@number_of_limbs = number_of_limbs
 					@draw_this = all_limbs_in_order[0..@number_of_limbs]					
 					make_board
 					draw_extras(0) if 1 == rand(2)
+					
 					# p @board
 				end
 
@@ -61,7 +64,7 @@ module HangMan
 
 				def hanger
 					all = []
-
+					name = @your_name.split("")
 					lines = { 	"H" => %w(H A N G M A N),
 								"=" => "=",
 								"#" => "#",
@@ -69,19 +72,19 @@ module HangMan
 								">" => "~",
 								"X" => "X",
 								"~" => "~",
-								"Z" => %w(Z A K)
+								"Z" => %w(Z A K   T H E   C R E A T O R),
+		 			 		name[0] => name
 							}		
 					cha = lines.keys[rand(lines.keys.length)]
 					i = 0
 					while i < 20
-						
 						c = lines[cha]
 						char = c[i % c.length] 
 
-						all << [2 + i, 18, char] if i < 2
-						all << [1 + i ,6, char] if i < 15
-						all << [1,4 + i, char] if i < 15
-						all << [16,4 + i, char] if i < 20
+						all << [2 + i , 18    , char] if i < 3 #the short rop
+						all << [2 + i , 6     , char] if i < 14 #the vertical part of the scaffold
+						all << [1 	  , 4 + i , char] if i < 15 #the top part of the scaffold
+						all << [16	  , 4 + i , char] if i < 18 #the bottom part of the scaffold
 					i += 1
 					end
 					all 
@@ -90,19 +93,21 @@ module HangMan
 				def head
 					i = 3
 					[
-						[i,18,"_"],
-						[i +1,17,"/"],
-						[i +1,19,"\\"],
-						[i + 2,17,"\\"],
-						[i + 2,19,"/"],
-						[i + 3, 18,"-"]
+						[i    , 18, "_"],
+						[i + 1, 17, "/"],
+						[i + 1, 18, "v"],
+						[i + 1, 19, "\\"],
+						[i + 2, 17, "\\"],
+						[i + 2, 18, "-"],
+						[i + 2, 19, "/"],
+						[i + 3, 18, "-"]
 						
 					]
 				end
 
 				def neck
 					[
-						[6,18,"#"]
+						[6,18,"="]
 					]
 				end
 
@@ -127,8 +132,8 @@ module HangMan
 				def left_arm
 					i = 8
 				[
-					[i,15,"/"],
-					[i+1,14,"/"],
+					[i 	  , 15, "/"],
+					[i + 1, 14, "/"],
 				]	
 				end
 
@@ -490,7 +495,7 @@ module HangMan
 	end
 	
 	####################################################################################################
-		attr_accessor :word, :hang_man, :game_voice
+		attr_accessor :word, :hang_man, :game_voice, :your_name
 
 		def initialize(word = "hangman")
 			@word = Words.new(word)
@@ -500,10 +505,23 @@ module HangMan
 		end
 
 		def show_intro
+			20.times{puts "\n"}
+			get_name_at_intro
 			5.times{puts "\n"}
 			put :hangman,
 				:intro
 			5.times{puts "\n"}
+			
+		end
+
+		def get_name_at_intro
+			
+			if 	@your_name == nil
+				put :what_name
+				name = gets.chomp
+				@your_name = name.upcase
+				@hang_man.your_name = @your_name
+			end
 		end
 
 		def game_end
@@ -551,7 +569,7 @@ module HangMan
 				choice
 
 				@word.new_word(choice)
-				@hang_man = Man.new(choice)
+				@hang_man = Man.new(choice,@your_name)
 				
 		end
 	end
