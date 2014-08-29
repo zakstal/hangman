@@ -61,9 +61,23 @@ module HangMan
 
 				def hanger
 					all = []
-					char = ["=","#","*","H",">","~","X"][rand(6)]
+
+					lines = { 	"H" => %w(H A N G M A N),
+								"=" => "=",
+								"#" => "#",
+								"*" => "*",
+								">" => "~",
+								"X" => "X",
+								"~" => "~",
+								"Z" => %w(Z A K)
+							}		
+					cha = lines.keys[rand(lines.keys.length)]
 					i = 0
 					while i < 20
+						
+						c = lines[cha]
+						char = c[i % c.length] 
+
 						all << [2 + i, 18, char] if i < 2
 						all << [1 + i ,6, char] if i < 15
 						all << [1,4 + i, char] if i < 15
@@ -218,15 +232,38 @@ module HangMan
 						[i-1,j+9,"."],
 						[i -2,j+6,"."],
 						[i ,j+10,":"],
-						# [i + 1, j+2,"-"],
-						# [i + 2, j+4,"-"],
-						# [i + 3, j+6,"-"],
-						# [i + 2, j+7,"-"],
-						# [i + 1, j+9,"-"],
-						# [i + 1, j+5,"-"],
+						[i + 1, j+2,"~"],
+						[i + 2, j+4,"~"],
+						[i + 3, j+6,"~"],
+						[i + 2, j+7,"~"],
+						[i + 1, j+9,"~"],
+						[i + 1, j+5,"~"],
 
 					]
 					
+				end
+				def sun
+						i = 1 + rand(10)
+					j = 35 + rand(10)
+					[
+						[i,j,":"],
+						# [i-1,j, "'"],
+						[i -1,j+1,","],
+						[i -2,j+7,"."],
+						[i -2,j+3,"."],
+						[i -2,j+4,"."],
+						[i-1,j+9,"."],
+						[i -2,j+6,"."],
+						[i ,j+10,":"],
+						[i,j,":"],
+						[i +1,j+1,","],
+						[i +2,j+7,"."],
+						[i +2,j+3,"."],
+						[i +2,j+4,"."],
+						[i+1,j+9,"."],
+						[i +2,j+6,"."],
+						[i ,j+10,":"]
+					]
 				end
 
 				private
@@ -252,11 +289,10 @@ module HangMan
 				def other_stuff
 					arr = []
 					rand(4).times{ arr << bird}
-					r = rand(2)
-					if 1 == r
-						arr << horizon
-						arr << sunset 
-					end
+					r = rand(4)
+					arr << horizon if r == 1 || r == 2 || r == 3
+					arr << sunset if r == 2 || r == 3
+					arr << sun if r == 1
 					arr
 				end
 
@@ -301,7 +337,7 @@ module HangMan
 					dictionary.each do |line|
 						next if line == " " 
 						word 	= line.match(/^\w+/)[0].swapcase
-						defin 	= line#[word.length + 1..-1]
+						defin 	= line
 						root 	= (if line =~ /<\w+/
 										line.match(/<\w+/)[0][1..-1]
 									elsif  line =~ /\{\w+/
